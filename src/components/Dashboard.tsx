@@ -32,8 +32,8 @@ export function Dashboard({ incoOrders, antiOrders, archivedOrders }: DashboardP
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="bg-white rounded-lg shadow p-6">
           <div className="flex items-center gap-4">
-            <div className="p-3 bg-blue-100 rounded-full">
-              <BarChart3 className="w-6 h-6 text-blue-600" />
+            <div className="p-3 bg-green-100 rounded-full">
+              <BarChart3 className="w-6 h-6 text-[#00843D]" />
             </div>
             <div>
               <p className="text-sm text-gray-600">Total OTs</p>

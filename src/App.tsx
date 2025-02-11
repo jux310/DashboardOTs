@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Warehouse } from 'lucide-react';
+import { Factory } from 'lucide-react';
 import { supabase } from './lib/supabase';
 import { Auth } from './components/Auth';
 import { WorkOrderTable } from './components/WorkOrderTable';
@@ -60,7 +60,7 @@ function App() {
   if (sessionLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600"></div>
       </div>
     );
   }
@@ -73,7 +73,7 @@ function App() {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="flex flex-col items-center gap-4">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600"></div>
           <p className="text-gray-600">Cargando órdenes de trabajo...</p>
         </div>
       </div>
@@ -88,7 +88,7 @@ function App() {
           <p className="text-gray-700 mb-6">{error}</p>
           <button
             onClick={() => window.location.reload()}
-            className="w-full py-2 px-4 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+            className="w-full py-2 px-4 bg-green-600 text-white rounded-md hover:bg-green-700"
           >
             Reintentar
           </button>
@@ -103,9 +103,13 @@ function App() {
         <div className="max-w-7xl mx-auto px-4 py-6 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-            <Warehouse className="h-8 w-8 text-blue-600" />
+            <Factory className={`h-8 w-8 ${
+              activeTab === 'inco' ? 'text-[#00843D]' : 
+              activeTab === 'anti' ? 'text-[#BF0900]' : 
+              'text-blue-600'
+            }`} />
             <h1 className="text-3xl font-bold text-gray-900">
-              Sistema de Seguimiento de Trabajos
+              Seguimiento de OTs
             </h1>
             </div>
             <button
@@ -136,7 +140,7 @@ function App() {
         {activeTab === 'inco' && (
           <section>
           <div className="flex justify-between items-center mb-4">
-            <h2 className="text-2xl font-semibold text-gray-900">INCO</h2>
+            <h2 className="text-2xl font-semibold text-gray-900">INCOMET</h2>
             <NewWorkOrderForm onSubmit={createWorkOrder} />
           </div>
           <WorkOrderTable
@@ -149,7 +153,7 @@ function App() {
 
         {activeTab === 'anti' && (
           <section>
-          <h2 className="text-2xl font-semibold text-gray-900 mb-4">ANTI</h2>
+          <h2 className="text-2xl font-semibold text-gray-900 mb-4">ANTICORR</h2>
           <WorkOrderTable
             workOrders={antiOrders}
             stages={ANTI_STAGES}

@@ -121,13 +121,46 @@ export function useWorkOrders(session: any) {
 
       if (!workOrder) throw new Error('Work order not found');
 
-      await supabase.from('work_order_dates').upsert({
-        work_order_id: workOrder.id,
-        stage,
-        date: date || null,
-        created_by: user.id,
-        updated_by: user.id
-      });
+      // First try to update existing date
+      const { data: existingDate, error: dateError } = await supabase
+        .from('work_order_dates')
+        .select('id')
+        .eq('work_order_id', workOrder.id)
+        .eq('stage', stage);
+
+      // Handle case where no date exists yet
+      if (dateError && dateError.code === 'PGRST116') {
+        // Insert new date
+        await supabase
+          .from('work_order_dates')
+          .insert({
+            work_order_id: workOrder.id,
+            stage,
+            date: date || null,
+            created_by: user.id,
+            updated_by: user.id
+          });
+      } else if (existingDate && existingDate.length > 0) {
+        // Update existing date
+        await supabase
+          .from('work_order_dates')
+          .update({
+            date: date || null,
+            updated_by: user.id,
+            updated_at: new Date().toISOString()
+          }).eq('id', existingDate[0].id);
+      } else {
+        // Insert new date
+        await supabase
+          .from('work_order_dates')
+          .insert({
+            work_order_id: workOrder.id,
+            stage,
+            date: date || null,
+            created_by: user.id,
+            updated_by: user.id
+          });
+      }
 
       // Update work order status and progress
       const stages = location === 'INCO' ? INCO_STAGES : ANTI_STAGES;
