@@ -129,6 +129,9 @@ function App() {
         {activeTab === 'dashboard' && (
           <div className="relative">
             <Watermark />
+            <div className="mb-6">
+              <NewWorkOrderForm onSubmit={createWorkOrder} />
+            </div>
             <Dashboard
               incoOrders={incoOrders}
               antiOrders={antiOrders}
@@ -139,10 +142,7 @@ function App() {
 
         {activeTab === 'inco' && (
           <section>
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-2xl font-semibold text-gray-900">INCOMET</h2>
-            <NewWorkOrderForm onSubmit={createWorkOrder} />
-          </div>
+          <h2 className="text-2xl font-semibold text-gray-900 mb-4">INCOMET</h2>
           <WorkOrderTable
             workOrders={incoOrders}
             stages={INCO_STAGES}

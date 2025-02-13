@@ -50,16 +50,16 @@ export function NewWorkOrderForm({ onSubmit }: NewWorkOrderFormProps) {
     return (
       <button
         onClick={() => setIsOpen(true)}
-        className="inline-flex items-center gap-2 px-4 py-2 bg-[#00843D] text-white rounded-lg hover:bg-[#006e33] transition-colors"
+        className="inline-flex items-center gap-2 px-6 py-3 bg-[#00843D] text-white rounded-lg hover:bg-[#006e33] transition-colors shadow-lg hover:shadow-xl"
       >
         <Plus className="w-4 h-4" />
-        Nueva OT
+        Crear Nueva OT
       </button>
     );
   }
 
   return (
-    <div className="bg-white p-6 rounded-lg shadow-lg">
+    <div className="bg-white p-8 rounded-xl shadow-xl max-w-2xl mx-auto">
       <div className="flex justify-between items-center mb-4">
         <h3 className="text-lg font-semibold text-gray-900">Nueva Orden de Trabajo</h3>
         <button
