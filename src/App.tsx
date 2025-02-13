@@ -123,9 +123,10 @@ function App() {
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-4 py-6 sm:px-6 lg:px-8 space-y-8">
+      <main className="max-w-7xl mx-auto py-6 space-y-8">
         <TabNavigation activeTab={activeTab} onTabChange={setActiveTab} />
         
+        <div className="px-4 sm:px-6 lg:px-8">
         {activeTab === 'dashboard' && (
           <div className="relative">
             <Watermark />
@@ -173,6 +174,7 @@ function App() {
             />
           </section>
         )}
+        </div>
       </main>
     </div>
   );
