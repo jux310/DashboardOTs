@@ -30,14 +30,14 @@ export function TabNavigation({ activeTab, onTabChange }: TabNavigationProps) {
   };
 
   return (
-    <div className="border-b border-gray-200">
-      <nav className="-mb-px flex space-x-8">
+    <div className="border-b border-gray-200 overflow-x-auto">
+      <nav className="-mb-px flex space-x-8 min-w-max px-4">
         {tabs.map((tab) => (
           <button
             key={tab.id}
             onClick={() => onTabChange(tab.id)}
             className={`
-              flex items-center gap-2 py-4 px-1 border-b-2 font-medium text-sm
+              flex items-center gap-2 py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap
               ${getActiveStyles(tab.id)}
             `}
           >
