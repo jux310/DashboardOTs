@@ -1,6 +1,17 @@
-import React from 'react';
-import { BarChart3, Clock, AlertTriangle } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { BarChart3, Clock, AlertTriangle, History } from 'lucide-react';
 import { WorkOrder } from '../types';
+import { format } from 'date-fns';
+import { es } from 'date-fns/locale';
+import { supabase } from '../lib/supabase';
+
+interface HistoryEntry {
+  changed_at: string;
+  ot: string;
+  field: string;
+  new_value: string;
+  user_email: string;
+}
 
 interface DashboardProps {
   incoOrders: WorkOrder[];
@@ -11,8 +22,61 @@ interface DashboardProps {
 export function Dashboard({ incoOrders, antiOrders, archivedOrders }: DashboardProps) {
   const totalOrders = incoOrders.length + antiOrders.length + archivedOrders.length;
   const inProgressOrders = incoOrders.length + antiOrders.length;
-  const completedOrders = archivedOrders.length;
-  
+  const [history, setHistory] = useState<HistoryEntry[]>([]);
+  const [historyLoading, setHistoryLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchHistory() {
+      try {
+        const { data, error } = await supabase
+          .from('work_order_history')
+          .select(`
+            changed_at,
+            field,
+            old_value,
+            new_value,
+            changed_by,
+            work_orders (
+              ot
+            )
+          `)
+          .not('field', 'in', '(status,progress)')
+          .order('changed_at', { ascending: false })
+          .limit(10);
+
+        if (error) throw error;
+
+        // Fetch user emails for the changes
+        const userIds = [...new Set(data.map(entry => entry.changed_by))];
+        const { data: users, error: usersError } = await supabase
+          .from('users')
+          .select('id, email')
+          .in('id', userIds);
+
+        if (usersError) throw usersError;
+
+        const userMap = new Map(users.map(user => [user.id, user.email]));
+
+        const formattedHistory = data.map(entry => ({
+          changed_at: entry.changed_at,
+          ot: entry.work_orders.ot,
+          field: entry.field,
+          old_value: entry.old_value,
+          new_value: entry.new_value,
+          user_email: userMap.get(entry.changed_by) || 'Usuario desconocido'
+        }));
+
+        setHistory(formattedHistory);
+      } catch (error) {
+        console.error('Error fetching history:', error);
+      } finally {
+        setHistoryLoading(false);
+      }
+    }
+
+    fetchHistory();
+  }, []);
+
   const getDelayedOrders = (orders: WorkOrder[]) => {
     return orders.filter(order => {
       const firstDate = Object.values(order.dates)[0];
@@ -47,7 +111,7 @@ export function Dashboard({ incoOrders, antiOrders, archivedOrders }: DashboardP
             </div>
             <div>
               <p className="text-sm text-gray-600">Completadas</p>
-              <p className="text-xl font-medium">{completedOrders}</p>
+              <p className="text-xl font-medium">{archivedOrders.length}</p>
             </div>
           </div>
         </div>
@@ -60,7 +124,7 @@ export function Dashboard({ incoOrders, antiOrders, archivedOrders }: DashboardP
             <div>
               <p className="text-sm text-gray-600">Tiempo Promedio</p>
               <p className="text-2xl font-semibold">
-                {completedOrders > 0 ? '45 días' : 'N/A'}
+                {archivedOrders.length > 0 ? '45 días' : 'N/A'}
               </p>
             </div>
           </div>
@@ -132,6 +196,42 @@ export function Dashboard({ incoOrders, antiOrders, archivedOrders }: DashboardP
               <span className="text-sm font-medium">{archivedOrders.length} OTs</span>
             </div>
           </div>
+        </div>
+      </div>
+
+      <div className="bg-white rounded-lg shadow p-6">
+        <div className="flex items-center gap-3 mb-4">
+          <div className="p-2 bg-blue-100 rounded-lg">
+            <History className="w-5 h-5 text-blue-600" />
+          </div>
+          <h3 className="text-lg font-semibold">Historial de Cambios</h3>
+        </div>
+        
+        <div className="space-y-4">
+          {historyLoading ? (
+            <div className="text-center text-gray-500">Cargando historial...</div>
+          ) : history.length === 0 ? (
+            <div className="text-center text-gray-500">No hay cambios recientes</div>
+          ) : (
+            <div className="space-y-2">
+              {history.map((entry, index) => (
+                <div
+                  key={`${entry.ot}-${entry.changed_at}-${index}`}
+                  className="text-sm text-gray-600 py-2 border-b last:border-b-0 flex items-center justify-between"
+                >
+                  <div className="flex-1">
+                    <span className="font-medium text-gray-900">
+                      {format(new Date(entry.changed_at), 'dd/MM/yyyy HH:mm:ss', { locale: es })}
+                    </span>
+                    {' '}OT {entry.ot} - {entry.field}: {entry.old_value} → {entry.new_value}
+                  </div>
+                  <div className="text-xs text-gray-500 ml-4">
+                    {entry.user_email}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </div>
